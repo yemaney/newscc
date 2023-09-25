@@ -6,7 +6,8 @@ from .transformers_ner_enricher import TransformersNerEnricher
 from .transformers_summarization_enricher import TransformersSummarizationEnricher
 from .transformers_zeroshot_classification_enricher import TransformersZeroShotClassificationEnricher
 from .keyword_extraction_enricher import KeyBertKeywordExtractionEnricher
-from .topic_modeling_enricher import TopicModelingEnricher
+# from .topic_modeling_enricher import TopicModelingEnricher
+from .transformers_sentiment_classification_enricher import TransformerSentimentClassificationEnricher
 
 class EnricherModelFactory():
     def __init__(self):
@@ -25,15 +26,15 @@ class EnricherModelFactory():
             elif model_source == config.TRANSFORMERS and category == config.ZERO_SHOT_CLASSIFICATION:
                 enricher_clazz = TransformersZeroShotClassificationEnricher(
                     model_name,
-                    config.NEWS_HIGH_LEVEL_CATEGORIES)
+                    config.NEWS_HIGH_LEVEL_CATEGORIES2)
+
             elif model_source == config.TRANSFORMERS and category == config.SUMMARIZATION:
                 enricher_clazz = TransformersSummarizationEnricher(model_name)
             elif model_source == config.TRANSFORMERS and category == config.KEYBERT_ALL_MINI_LM_L6_V2:
                 enricher_clazz = KeyBertKeywordExtractionEnricher(model_name)
-            elif category == "TopicModelingEnricher":
-                enricher_clazz = TopicModelingEnricher(model_name)
 
-            
+            elif model_source == config.TRANSFORMERS and category == "sentiment":
+                enricher_clazz = TransformerSentimentClassificationEnricher()
             if enricher_clazz:
                 self.enricher_models[enricher_model_key] = enricher_clazz
             else:

@@ -15,11 +15,11 @@ class KeyBertKeywordExtractionEnricher(Enricher):
         kw_model = KeyBERT(model=self.model_name)
         extracted_keywords = kw_model.extract_keywords(text, keyphrase_ngram_range=(1, 2), use_mmr=True, diversity=0.5, top_n=10)
 
-        keywords = [] # type: list[Keyword]
-        for extracted_keyword in extracted_keywords:
-            keywords.append(Keyword(keyword=extracted_keyword[0], distance=extracted_keyword[1]))
+        # keywords = [] # type: list[Keyword]
+        # for extracted_keyword in extracted_keywords:
+        #     keywords.append(Keyword(keyword=extracted_keyword[0], distance=extracted_keyword[1]))
 
-        return Keywords(keywords=keywords)
+        return [elem[0] for elem in extracted_keywords]
 
 if __name__ == '__main__':
     content = '''

@@ -3,6 +3,7 @@ import json
 import logging
 import os.path
 import time
+from datetime import datetime
 from glob import glob
 
 from richcrawl.newsfetch_enrichers import config
@@ -23,7 +24,6 @@ def enrich_function_caller(clazz, method_name: str, *args, **kwargs):
 
 def list_files(root_dir: str, pattern: str):
     path_pattern = os.path.join(root_dir, pattern)
-    print(path_pattern)
     files = glob(path_pattern, recursive=True)
     return files
 
@@ -83,14 +83,14 @@ def enrich_content(enricher: tuple[EnrichmentInput, str], article_json):
         return
 
     enrichments = enrich_function_caller(enrichment_input.enricher_clazz, enrichment_input.enrich_method_name, text)
-
     if enrichments:
-        enrichment_response = util.build_enrichment_payload(processed_content, enrichment_input)
+        enrichment_response = {} # util.build_enrichment_payload(processed_content, enrichment_input)
         try:
-            enrichment_response.update(enrichments.dict())
+            # enrichment_response.update(enrichments.dict())
+            enrichment_response = enrichments
         except Exception:
             logging.info(f"enrichments results {enrichments} was not a dict! check JSON output!!")
-            enrichment_response.update(enrichments)
+            # enrichment_response.update(enrichments)
         return enrichment_response
 
 
@@ -104,53 +104,48 @@ def create_enrichers(enrichment_inputs_metadata):
     return enrichment_inputs_metadata
 
 
-def enrich_data(processed_file_gen, enrichment_inputs_metadata):
+def enrich_data(article_json, enrichment_inputs_metadata):
     n = len(enrichment_inputs_metadata)
 
-    for article_json in processed_file_gen:
-        new = {}
+    new = {}
 
-        file_name = article_json["meta_info"]["dataset_id"]
-        enrichers = build_enrichers(file_name, enrichment_inputs_metadata)
-        for enricher in enrichers:
-            try:
-                logging.info(f"enriching {file_name} with {enricher[0].model_name}...")
-                enrichment_response = enrich_content(enricher, article_json)
-                
-                new[CATEGORY_TO_OUTPUT[enricher[0].category]] = enrichment_response
-            
-            except Exception as e:
-                logging.error(f"error enriching file: {file_name} with {enricher[0].model_name}:{enricher[0].model_source} "
-                              f"due to: {e}")
+    file_name = article_json["meta_info"]["dataset_id"]
+    enrichers = build_enrichers(file_name, enrichment_inputs_metadata)
+    for enricher in enrichers:
+        try:
+            logging.info(f"enriching {file_name} with {enricher[0].model_name}...")
+            enrichment_response = enrich_content(enricher, article_json)
+            new[CATEGORY_TO_OUTPUT[enricher[0].category]] = enrichment_response
+        
+        except Exception as e:
+            logging.error(f"error enriching file: {file_name} with {enricher[0].model_name}:{enricher[0].model_source} "
+                            f"due to: {e}")
 
-        if len(new) == n:
-            
-            yield {**article_json, **new}
+    if len(new) == n:
+        result = {**article_json, **new}
+        d = datetime.strptime(result["published_date"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
+
+
+        result["published_date"] = d
+        result["dataset_id"] = result["meta_info"]["dataset_id"]
+        result.pop("meta_info")
+        result["authors"] = ", ".join(result["authors"])
+        result["entities"] = ", ".join(result["entities"])
+        result["keywords"] = ", ".join(result["keywords"])
+        result["sentiment_score"] = result["sentiment"]["sentiment_score"]
+        result["sentiment"] = result["sentiment"]["sentiment"]
+        return result
 
 
 CATEGORY_TO_OUTPUT = {
-    config.NER : "entity_aggregates",
+    config.NER : "entities",
     config.SUMMARIZATION : "summary",
-    config.KEYBERT_ALL_MINI_LM_L6_V2 : "keywords"
+    config.KEYBERT_ALL_MINI_LM_L6_V2 : "keywords",
+    config.ZERO_SHOT_CLASSIFICATION : "topic",
+    "sentiment" : "sentiment"
 }
 
 def enrich(processed_file_gen):
-
-    enrichment_inputs_metadata_huggingface_ner = [
-        # {
-        #     "model_source": config.TRANSFORMERS,
-        #     "model_name": config.TRANSFORMERS_NER_ELASTIC_DISTILBERT_BASE_CASED_FINETUNED_CONLL03_ENG_NER,
-        #     "category": config.NER
-        # }
-    ]
-    enrichment_inputs_metadata_huggingface_zeroshot = [
-        # {
-        #     "model_source": config.TRANSFORMERS,
-        #     "model_name": config.TRANSFORMERS_CLASSIFICATION_VALHALLA_DISTILBART_MNLI_12_1,
-        #     "category": config.ZERO_SHOT_CLASSIFICATION
-        # }
-    ]
-
     enrichment_inputs_metadata = [
         {
             "model_source": config.SPACY,
@@ -168,16 +163,18 @@ def enrich(processed_file_gen):
             "category": config.KEYBERT_ALL_MINI_LM_L6_V2
         },
         {
-            "model_source": "topic",
-            "model_name": "all-MiniLM-L6-v2",
-            "category": "TopicModelingEnricher"
+            "model_source": config.TRANSFORMERS,
+            "model_name": config.TRANSFORMERS_CLASSIFICATION_VALHALLA_DISTILBART_MNLI_12_1,
+            "category": config.ZERO_SHOT_CLASSIFICATION
+        },
+        {
+            "model_source": config.TRANSFORMERS,
+            "model_name": "sentiment",
+            "category": "sentiment"
         }
-
     ]
 
     all_metadatas = []
-    all_metadatas.extend(enrichment_inputs_metadata_huggingface_ner)
-    all_metadatas.extend(enrichment_inputs_metadata_huggingface_zeroshot)
     all_metadatas.extend(enrichment_inputs_metadata)
 
     enrichment_inputs_metadata = create_enrichers(all_metadatas)

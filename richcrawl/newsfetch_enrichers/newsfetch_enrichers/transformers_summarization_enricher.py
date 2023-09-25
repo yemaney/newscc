@@ -15,10 +15,10 @@ class TransformersSummarizationEnricher(TransformersEnricher):
     def enrich(self, text: str) -> Summarization:
         results = self.summarization_pipeline(text)
         for result in results:
-            return Summarization(summary=result["summary_text"])
+            return result["summary_text"]
 
         logging.warning("No summary found for text...", )
-        return Summarization(summary="")
+        return result["summary_text"]
 
 
 if __name__ == '__main__':

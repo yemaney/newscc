@@ -21,6 +21,7 @@ def build_enrichment_payload(processed_content, enrichment_input: EnrichmentInpu
         "model_name": enrichment_input.model_name,
         "category": enrichment_input.category,
     })
+ 
     return enrichment_payload
 
 def write_json_to_file(dirs: List, file_name, data):

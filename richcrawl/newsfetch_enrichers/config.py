@@ -26,9 +26,17 @@ ARTS_AND_ENTERTAINMENT = 'entertainment'
 
 NEWS_HIGH_LEVEL_CATEGORIES = [BUSINESS_AND_FINANCE, 'travel', 'politics', 'religion', 'sport', ARTS_AND_ENTERTAINMENT,
                               SCIENCE_AND_TECHNOLOGY]
-BUSINESS_AND_FINANCE_SUB_CATEGORIES = ['markets', 'economy', 'finance', 'housing']
-SCIENCE_AND_TECHNOLOGY_SUB_CATEGORIES = ['climate', 'health', 'technology', 'coronavirus', 'space', 'astronomy']
+BUSINESS_AND_FINANCE_SUB_CATEGORIES = ['markets', 'economy', 'finance', 'housing', 'supply', 'demand']
+SCIENCE_AND_TECHNOLOGY_SUB_CATEGORIES = ['climate', 'medicine', 'technology', 'space', 'artificial intelligence', 
+                                         'chemistry', 'physics' ]
 ARTS_AND_ENTERTAINMENT_SUB_CATEGORIES = ['film', 'music', 'TV', 'theatre', 'books', 'dance', 'art']
+
+
+NEWS_HIGH_LEVEL_CATEGORIES2 = ['travel', 'politics', 'religion', 'sport', 'education', *BUSINESS_AND_FINANCE_SUB_CATEGORIES,
+                               *SCIENCE_AND_TECHNOLOGY_SUB_CATEGORIES, *ARTS_AND_ENTERTAINMENT_SUB_CATEGORIES]
+
+
+
 NEWS_REGIONS = ['USA', 'North America', 'Middle East', 'Americas', 'Europe', 'Asia', 'Australia', 'Africa', 'India',
                 'Germany', 'France', 'Netherlands', 'Dubai']
 
