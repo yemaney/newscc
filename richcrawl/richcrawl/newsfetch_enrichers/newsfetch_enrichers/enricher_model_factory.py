@@ -6,7 +6,7 @@ from .transformers_ner_enricher import TransformersNerEnricher
 from .transformers_summarization_enricher import TransformersSummarizationEnricher
 from .transformers_zeroshot_classification_enricher import TransformersZeroShotClassificationEnricher
 from .keyword_extraction_enricher import KeyBertKeywordExtractionEnricher
-from .topic_modeling_enricher import TopicModelingEnricher
+# from .topic_modeling_enricher import TopicModelingEnricher
 from .transformers_sentiment_classification_enricher import TransformerSentimentClassificationEnricher
 
 class EnricherModelFactory():

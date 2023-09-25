@@ -19,11 +19,11 @@ def process_warc_content_dir(extract_data):
     # logging.debug(f'processing warc content dir: {warc_extract_dir}...')
     futures = []
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        for result, i in extract_data:
+        for result in extract_data:
             domain, file_name, data = result
             content_processor_wrapper = ContentProcessorWrapper(data)
             futures.append(executor.submit(content_processor_wrapper.process_warc_content))
-
+            break
     for future in concurrent.futures.as_completed(futures):
         result = future.result()
         if result is not None:

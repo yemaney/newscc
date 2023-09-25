@@ -3,7 +3,6 @@ import io
 import logging
 import os
 import pathlib
-import sys
 import urllib.request
 from datetime import datetime
 import shutil
@@ -84,11 +83,12 @@ class GetLatestNewsWarcArchive():
 
             warc_file_url = CC_DATA_ROOT + warc_file_partial_suffix_path
             logging.info("downloading warc file from %s and saving to %s...", warc_file_url, destination_file)
-            #urlretrieve(warc_file_url, destination_file)
-            # self.download_file(warc_file_url, destination_file)
+            # urlretrieve(warc_file_url, destination_file)
+            self.download_file(warc_file_url, destination_file)
 
             logging.info("downloaded most recent warc file to %s", destination_file)
             yield warc_file_name, destination_file
+            os.remove(destination_file)
 
 def main():
     for warc_file_name, _ in GetLatestNewsWarcArchive().fetch_all_files(config.COMMON_CRAWL_DATA_DIR):

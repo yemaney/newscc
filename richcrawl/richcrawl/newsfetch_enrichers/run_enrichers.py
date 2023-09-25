@@ -104,38 +104,37 @@ def create_enrichers(enrichment_inputs_metadata):
     return enrichment_inputs_metadata
 
 
-def enrich_data(processed_file_gen, enrichment_inputs_metadata):
+def enrich_data(article_json, enrichment_inputs_metadata):
     n = len(enrichment_inputs_metadata)
 
-    for article_json in processed_file_gen:
-        new = {}
+    new = {}
 
-        file_name = article_json["meta_info"]["dataset_id"]
-        enrichers = build_enrichers(file_name, enrichment_inputs_metadata)
-        for enricher in enrichers:
-            try:
-                logging.info(f"enriching {file_name} with {enricher[0].model_name}...")
-                enrichment_response = enrich_content(enricher, article_json)
-                new[CATEGORY_TO_OUTPUT[enricher[0].category]] = enrichment_response
-            
-            except Exception as e:
-                logging.error(f"error enriching file: {file_name} with {enricher[0].model_name}:{enricher[0].model_source} "
-                              f"due to: {e}")
+    file_name = article_json["meta_info"]["dataset_id"]
+    enrichers = build_enrichers(file_name, enrichment_inputs_metadata)
+    for enricher in enrichers:
+        try:
+            logging.info(f"enriching {file_name} with {enricher[0].model_name}...")
+            enrichment_response = enrich_content(enricher, article_json)
+            new[CATEGORY_TO_OUTPUT[enricher[0].category]] = enrichment_response
+        
+        except Exception as e:
+            logging.error(f"error enriching file: {file_name} with {enricher[0].model_name}:{enricher[0].model_source} "
+                            f"due to: {e}")
 
-        if len(new) == n:
-            result = {**article_json, **new}
-            d = datetime.strptime(result["published_date"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
+    if len(new) == n:
+        result = {**article_json, **new}
+        d = datetime.strptime(result["published_date"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
 
 
-            result["published_date"] = d
-            result["dataset_id"] = result["meta_info"]["dataset_id"]
-            result.pop("meta_info")
-            result["authors"] = ", ".join(result["authors"])
-            result["entities"] = ", ".join(result["entities"])
-            result["keywords"] = ", ".join(result["keywords"])
-            result["sentiment_score"] = result["sentiment"]["sentiment_score"]
-            result["sentiment"] = result["sentiment"]["sentiment"]
-            yield result
+        result["published_date"] = d
+        result["dataset_id"] = result["meta_info"]["dataset_id"]
+        result.pop("meta_info")
+        result["authors"] = ", ".join(result["authors"])
+        result["entities"] = ", ".join(result["entities"])
+        result["keywords"] = ", ".join(result["keywords"])
+        result["sentiment_score"] = result["sentiment"]["sentiment_score"]
+        result["sentiment"] = result["sentiment"]["sentiment"]
+        return result
 
 
 CATEGORY_TO_OUTPUT = {

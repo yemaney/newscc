@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 
 from richcrawl.newsfetch_core.common import constants, util
 
-from . import config
+from richcrawl.newsfetch_common_crawl import config
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "ERROR"))
 
@@ -29,8 +29,8 @@ class CommonCrawlWarcExtractor:
             futures = []
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 for record in ArchiveIterator(stream):
-                    if num_processed >= 1:
-                        break
+                    # if num_processed >= 1:
+                    #     break
                     if record.rec_type == 'request':
                         continue
 
@@ -101,7 +101,12 @@ class RecordProcessorWrapper():
 
 def extract(warc_file_name: str):
     file_path = os.path.join(f"{config.COMMON_CRAWL_DATA_DIR}/{warc_file_name}")
+    print(file_path)
     logging.info(f"processing warc file: {file_path}...")
     common_crawl_warc_extractor = CommonCrawlWarcExtractor()
     gen = common_crawl_warc_extractor.process(file_path, limit=False)
     return gen
+
+if __name__ == "__main__":
+    print("Checking...")
+    extract("CC-NEWS-20230904033415-01019.warc.gz")
