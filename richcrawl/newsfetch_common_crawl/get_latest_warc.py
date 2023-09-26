@@ -18,7 +18,7 @@ COMMOM_CRAWL_BUCKET = 'commoncrawl'
 COMMOM_CRAWL_CC_NEWS_PREFIX = 'crawl-data/CC-NEWS'
 now = datetime.now()
 CC_DATA_ROOT = f"https://data.commoncrawl.org/"
-WARC_LISTING_FILE_URL = f"{CC_DATA_ROOT}{COMMOM_CRAWL_CC_NEWS_PREFIX}/{now.year}/{now.strftime('%m')}/warc.paths.gz"
+WARC_LISTING_FILE_URL = f"{CC_DATA_ROOT}{COMMOM_CRAWL_CC_NEWS_PREFIX}/2023/01/warc.paths.gz"
 
 class GetLatestNewsWarcArchive():
     def fetch_most_recent_file(self, common_crawl_data_dir: str) -> tuple[str, str]:
@@ -100,6 +100,6 @@ if __name__ == '__main__':
     print("Checking....")
     for wf in main():
         # print(wf)
-        pass
+        break
     # exit(0)
 
