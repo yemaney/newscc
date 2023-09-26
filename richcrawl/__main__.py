@@ -18,18 +18,21 @@ def richcrawl():
         for raw_file in  extract(warc_file_name):
             print(f"{raw_file[0][2].keys() = }")
             for processed_file in process_warc_content_dir(raw_file):
-                print(f"{processed_file.keys() = }")
-                enriched_file = enrich(processed_file)
-                print(f"{enriched_file.keys() = }")
+                try:
+                    print(f"{processed_file.keys() = }")
+                    enriched_file = enrich(processed_file)
+                    print(f"{enriched_file.keys() = }")
 
-                json_data = json.dumps(enriched_file)
-                bucket_name = 'newsfetch-cc'
-                object_key = f'{enriched_file["published_date"]}/{enriched_file["dataset_id"]}.json'
-                s3.put_object(Bucket=bucket_name, Key=object_key, Body=json_data)
+                    json_data = json.dumps(enriched_file)
+                    bucket_name = 'newsfetch-cc'
+                    object_key = f'{enriched_file["published_date"]}/{enriched_file["dataset_id"]}.json'
+                    s3.put_object(Bucket=bucket_name, Key=object_key, Body=json_data)
 
-                i+=1
-                print(f"uploaded {object_key}")
-                print("#######"*10, i, "#"*10)
+                    i+=1
+                    print(f"uploaded {object_key}")
+                    print("#######"*10, i, "#"*10)
+                except:
+                    print("issue...")
 
 if __name__ == "__main__":
     richcrawl()
